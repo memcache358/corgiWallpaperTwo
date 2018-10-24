@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CorgiWallpaperTwo</string>
+    <string name="title_activity_set_image">SetImageActivity</string>
+</resources>
