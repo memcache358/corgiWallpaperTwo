@@ -34,30 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private List<GalleryItem> mGalleryList;
     String TAG = "MainActivity";
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
-            if (resultCode == RESULT_OK) {
-                Uri resultUri = result.getUri();
-
-                WallpaperManager myWallpaperManager
-                        = WallpaperManager.getInstance(getApplicationContext());
-                try {
-                    Bitmap croppedBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), resultUri);
-                        myWallpaperManager.setBitmap(croppedBitmap);
-                    Toast.makeText(this, "Wallpaper successfully set!", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    Toast.makeText(this, "Error, wallpaper not set!", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-
-            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                Exception error = result.getError();
-            }
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,27 +53,22 @@ public class MainActivity extends AppCompatActivity {
         ItemClickSupport.addTo(rvGallery)
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        Toast.makeText(v.getContext(), "position:" + position, Toast.LENGTH_SHORT).show();
+                    public void onItemClicked(RecyclerView recyclerView, int position, final View v) {
 
-
-                        Glide.with(v.getContext())
+                        GlideApp.with(v.getContext())
                                 .asBitmap()
                                 .load(mGalleryList.get(position).getUrl())
                                 .into(new SimpleTarget<Bitmap>() {
                                     @Override
                                     public void onResourceReady(Bitmap resource,Transition<? super Bitmap> transition) {
 
-
                                        Uri bitmapUri =  getLocalBitmapUri(resource);
 
-                                       CropImage.activity(bitmapUri).
-                                               setGuidelines(CropImageView.Guidelines.ON)
-                                                .start(MainActivity.this);
+                                        Intent intent = new Intent(v.getContext(), SetImageActivity.class);
+                                        intent.putExtra("bitmapUri", bitmapUri);
+                                        startActivity(intent);
                                     }
                                 });
-
-                        Log.d(TAG, "clicked" + position);
                     }
                 });
     }
@@ -109,9 +80,8 @@ public class MainActivity extends AppCompatActivity {
     cropBtn.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            CropImage.activity()
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .start(MainActivity.this);
+            Intent intent = new Intent(v.getContext(), SetImageActivity.class);
+            startActivity(intent);
         }
     });
 
@@ -151,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
             else{
                 mGalleryList.add(new GalleryItem("https://vetstreet.brightspotcdn.com/dims4/default/79f1bd2/2147483647/crop/0x0%2B0%2B0/resize/645x380/quality/90/?url=https%3A%2F%2Fvetstreet-brightspot.s3.amazonaws.com%2F83%2F9e8de0a7f411e0a0d50050568d634f%2Ffile%2FPembroke-Welsh-Corgi-3-645mk62711.jpg", "desc" + i, false));
             }
-
         }
     }
 

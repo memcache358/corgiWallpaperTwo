@@ -59,10 +59,10 @@ public class GalleryAdapter extends
                 .placeholder(R.drawable.spinner);
 
         Log.d(TAG, "url:" + galleryItem.getUrl());
-
-        Glide.with(imageView.getContext())
+//.apply(options)
+        GlideApp.with(imageView.getContext())
                 .load(galleryItem.getUrl())
-                .apply(options)
+
                 .into(imageView);
 
     }
