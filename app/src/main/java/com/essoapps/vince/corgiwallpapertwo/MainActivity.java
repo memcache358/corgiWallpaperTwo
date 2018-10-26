@@ -1,12 +1,16 @@
 package com.essoapps.vince.corgiwallpapertwo;
 
+import android.Manifest;
 import android.app.WallpaperManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -61,9 +65,7 @@ public class MainActivity extends AppCompatActivity {
                                 .into(new SimpleTarget<Bitmap>() {
                                     @Override
                                     public void onResourceReady(Bitmap resource,Transition<? super Bitmap> transition) {
-
-                                       Uri bitmapUri =  getLocalBitmapUri(resource);
-
+                                       Uri bitmapUri =  getLocalBitmapUri(resource,v.getContext());
                                         Intent intent = new Intent(v.getContext(), SetImageActivity.class);
                                         intent.putExtra("bitmapUri", bitmapUri);
                                         startActivity(intent);
@@ -73,9 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
     public void initListeners(){
-
     cropBtn = findViewById(R.id.crop_btn);
     cropBtn.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -88,16 +88,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    public static Uri getLocalBitmapUri(Bitmap bmp) {
+    public static Uri getLocalBitmapUri(Bitmap bmp, Context context) {
         // Store image to default external storage directory
         Uri bmpUri = null;
         try {
-            File file = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
+            File file = new File(context.getFilesDir(), "share_image_" + System.currentTimeMillis() + ".png");
             file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(file);
-            bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
             out.close();
             bmpUri = Uri.fromFile(file);
         } catch (IOException e) {
