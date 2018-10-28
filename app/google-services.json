@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "488989621171",
+    "firebase_url": "https://corgiwallapertwo.firebaseio.com",
+    "project_id": "corgiwallapertwo",
+    "storage_bucket": "corgiwallapertwo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:488989621171:android:2fe7b99a1fe03baf",
+        "android_client_info": {
+          "package_name": "com.essoapps.vince.corgiwallpapertwo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "488989621171-sgs6ncangsbk2q38h9rkpitlducsgdp6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-IFWLKsCemCuqFf-hhCLD7PxEE8rrPs0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

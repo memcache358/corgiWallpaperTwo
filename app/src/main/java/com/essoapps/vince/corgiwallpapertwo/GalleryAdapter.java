@@ -48,6 +48,7 @@ public class GalleryAdapter extends
         return viewHolder;
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull GalleryAdapter.ViewHolder viewHolder, int i) {
 
@@ -59,11 +60,12 @@ public class GalleryAdapter extends
                 .placeholder(R.drawable.spinner);
 
         Log.d(TAG, "url:" + galleryItem.getUrl());
-//.apply(options)
-        GlideApp.with(imageView.getContext())
-                .load(galleryItem.getUrl())
 
-                .into(imageView);
+
+            GlideApp.with(imageView.getContext())
+                    .load(galleryItem.getUrl())
+                    .apply(options)
+                    .into(imageView);
 
     }
 

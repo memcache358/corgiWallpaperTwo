@@ -1,30 +1,29 @@
 package com.essoapps.vince.corgiwallpapertwo;
 
-import android.Manifest;
-import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageActivity;
-import com.theartofdev.edmodo.cropper.CropImageView;
+
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,25 +33,30 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button cropBtn;
+
     private List<GalleryItem> mGalleryList;
     String TAG = "MainActivity";
-
+    private Boolean showEndToast;
+    private String lastUpdate;
+    private static final String AD_UNIT = "ca-app-pub-3940256099942544/6300978111";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initListeners();
+        lastUpdate="unknown";
+        initAdMob(AD_UNIT);
         populateList();
-
+        showEndToast=true;
         RecyclerView rvGallery = findViewById(R.id.gallery_rv);
 
         GalleryAdapter adapter = new GalleryAdapter(mGalleryList);
 
         rvGallery.setAdapter(adapter);
         rvGallery.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        Log.d(TAG, "size" + adapter.getItemCount());
+
+
+        firebasePopulate();
 
         ItemClickSupport.addTo(rvGallery)
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
@@ -73,20 +77,79 @@ public class MainActivity extends AppCompatActivity {
                                 });
                     }
                 });
+
+        rvGallery.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!recyclerView.canScrollVertically(1)) {
+                    if(showEndToast) {
+                        Toast.makeText(MainActivity.this, "Sorry, that's all the corgi images for now. \nCorgi images last updated on: \n"+lastUpdate, Toast.LENGTH_LONG).show();
+                        firebasePopulate();
+                        showEndToast = false;
+                    }
+                }
+            }
+        });
     }
 
-    public void initListeners(){
-    cropBtn = findViewById(R.id.crop_btn);
-    cropBtn.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent = new Intent(v.getContext(), SetImageActivity.class);
-            startActivity(intent);
-        }
-    });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showEndToast=true;
+    }
 
+    private void initAdMob(String adUnit) {
+        MobileAds.initialize(this,
+                adUnit);
+
+        AdView mAdView = findViewById(R.id.activity_main_ad_view);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+    }
+
+    public void firebasePopulate(){
+        Log.d(TAG, "populating database");
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("gallery_items");
+        DatabaseReference dateRef = database.getReferenceFromUrl("https://corgiwallapertwo.firebaseio.com/info/0/lastUpdated");
+
+        dateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                lastUpdate = dataSnapshot.getValue().toString();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "success");
+                Log.d(TAG, "count is:" +dataSnapshot.getChildrenCount());
+                for(DataSnapshot ds : dataSnapshot.getChildren()){
+                    Log.d(TAG, ds.child("url").getValue().toString());
+                    GalleryItem galleryItem = new GalleryItem();
+                    galleryItem.setUrl(ds.child("url").getValue().toString());
+                    if(!mGalleryList.contains(galleryItem))
+                        mGalleryList.add(galleryItem);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "fail");
+            }
+        });
 
     }
+
 
     public static Uri getLocalBitmapUri(Bitmap bmp, Context context) {
         // Store image to default external storage directory
@@ -106,20 +169,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void populateList(){
         mGalleryList = new ArrayList<>();
+        //need atleast one dummy holder
+        mGalleryList.add(new GalleryItem("https://s3.amazonaws.com/cdn-origin-etr.akc.org/wp-content/uploads/2017/11/12225900/Pembroke-Welsh-Corgi-On-White-07.jpg","desc", true));
 
-
-        mGalleryList.add(new GalleryItem("https://i.pinimg.com/474x/47/90/2a/47902a355801c38f4009fb72c04365e3--corgi-dog-pembroke-welsh-corgi.jpg","desc", true));
-        mGalleryList.add(new GalleryItem("https://i.pinimg.com/474x/b8/37/c0/b837c01f8faf242f515ed4e930b91be2--corgi-dog-corgi-pembroke.jpg","desc", true));
-        mGalleryList.add(new GalleryItem("https://i.pinimg.com/474x/ff/a5/63/ffa56317b7e3c956e12f82f9f9ffb0d8.jpg","desc", true));
-
-        for(int i =0; i < 20; i++){
-            if(i%2 ==0) {
-                mGalleryList.add(new GalleryItem("https://cdn1-www.dogtime.com/assets/uploads/2011/01/file_23192_pembroke-welsh-corgi-460x290.jpg", "desc" + i, true));
-            }
-            else{
-                mGalleryList.add(new GalleryItem("https://vetstreet.brightspotcdn.com/dims4/default/79f1bd2/2147483647/crop/0x0%2B0%2B0/resize/645x380/quality/90/?url=https%3A%2F%2Fvetstreet-brightspot.s3.amazonaws.com%2F83%2F9e8de0a7f411e0a0d50050568d634f%2Ffile%2FPembroke-Welsh-Corgi-3-645mk62711.jpg", "desc" + i, false));
-            }
-        }
     }
 
 }

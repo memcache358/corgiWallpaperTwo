@@ -12,6 +12,16 @@ public class GalleryItem {
         this.active = active;
     }
 
+    public GalleryItem(){
+        this.url="";
+        this.desc="";
+        this.active=false;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public String getUrl() {
         return url;
     }

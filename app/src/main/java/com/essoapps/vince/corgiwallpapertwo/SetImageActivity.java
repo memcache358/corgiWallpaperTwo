@@ -3,21 +3,16 @@ package com.essoapps.vince.corgiwallpapertwo;
 import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import java.io.File;
 import java.io.IOException;
 
 public class SetImageActivity extends AppCompatActivity {
@@ -52,6 +47,7 @@ public class SetImageActivity extends AppCompatActivity {
             Bitmap croppedImg = cropImageView.getCroppedImage();
             myWallpaperManager.setBitmap(croppedImg);
             Toast.makeText(v.getContext(), "Wallpaper Set!", Toast.LENGTH_SHORT).show();
+            finish();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
